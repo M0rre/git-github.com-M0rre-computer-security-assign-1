@@ -1,14 +1,16 @@
 from task_3 import substitution_cipher, transposition_cipher
 
+
 def process_text(text, method, key, encrypt):
     if method == 's':
-        return substitution_cipher(text, key, encrypt=encrypt)
+        return substitution_cipher(text, key, encrypt)
     elif method == 't':
-        return transposition_cipher(text, key, encrypt=encrypt)
+        return transposition_cipher(text, key, encrypt)
     else:
         raise ValueError("Invalid encryption method.")
 
-def retireve_file_message(input_file, output_file, method, key, encrypt):
+
+def retrieve_file_message(input_file, output_file, method, key, encrypt):
     # Read input file
     try:
         with open(input_file, 'r', encoding="UTF-8") as file:
@@ -17,9 +19,18 @@ def retireve_file_message(input_file, output_file, method, key, encrypt):
         print(f"Error: The file {input_file} was not found.")
         return
 
+    # Process the content
+    header = lines[:7]
+    content = lines[7:-1]
+    footer = lines[-1]
+
+    content = process_text(content, method, key, encrypt)
+
     # Write to output file
     with open(output_file, 'w', encoding="UTF-8") as file:
-        header = lines[]
+        file.writelines(header)
+        file.write(content)
+        file.write(footer)
 
 
 def main():
@@ -32,10 +43,11 @@ def main():
     encrypt = operation == 'e'
 
     try:
-        retireve_file_message(input_file, output_file, method, key, encrypt)
+        retrieve_file_message(input_file, output_file, method, key, encrypt)
         print(f"File successfully {'encrypted' if encrypt else 'decrypted'} and saved to {output_file}.")
     except Exception as e:
         print(f"An error occurred: {e}")
+
 
 if __name__ == "__main__":
     main()

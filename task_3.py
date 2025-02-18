@@ -1,4 +1,4 @@
-def substitution_cipher(text, key, encrypt=True):
+def substitution_cipher(text, key,  encrypt):
     result = ""
     key = key % 256  # Keeps key withing bounds
     for char in text:
@@ -18,7 +18,7 @@ def substitution_cipher(text, key, encrypt=True):
     return result
 
 
-def transposition_cipher(text, key, encrypt=True):
+def transposition_cipher(text, key, encrypt):
     if encrypt:  # Encrypt
         # Calculate the number of rows needed
         rows = (len(text) + key - 1) // key
@@ -36,7 +36,8 @@ def transposition_cipher(text, key, encrypt=True):
         ciphertext = ''
         for col in range(key):
             for row in range(rows):
-                ciphertext += matrix[row][col]
+                if matrix[row][col] != '':
+                    ciphertext += matrix[row][col]
 
         return ciphertext
 
@@ -44,16 +45,16 @@ def transposition_cipher(text, key, encrypt=True):
         # Calculate the number of rows needed
         rows = (len(text) + key - 1) // key
 
-        # Create a matrix with the calculated number of rows
+        # Create a list of lists (matrixx) with the calculated number of rows
         matrix = [['' for _ in range(key)] for _ in range(rows)]
 
         # Fill the matrix column-wise
-        index = 0
+        idx = 0
         for col in range(key):
             for row in range(rows):
-                if index < len(text):
-                    matrix[row][col] = text[index]
-                    index += 1
+                if idx < len(text):
+                    matrix[row][col] = text[idx]
+                    idx += 1
 
         # Read the matrix row-wise to get the plaintext
         plaintext = ''

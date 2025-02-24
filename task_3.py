@@ -1,3 +1,6 @@
+import random
+
+
 def substitution_cipher(text, key,  encrypt):
     result = ""
     key = key % 256  # Keeps key withing bounds
@@ -19,50 +22,48 @@ def substitution_cipher(text, key,  encrypt):
 
 
 def transposition_cipher(text, key, encrypt):
-    if encrypt:  # Encrypt
-        # Calculate the number of rows needed
-        rows = (len(text) + key - 1) // key
+    # Set seed for reproducible shuffle
+    random.seed(key) 
+    num_cols = key
+    num_rows = (len(text) + num_cols - 1) // num_cols
 
-        # Create a matrix with the calculated number of rows
-        matrix = [['' for _ in range(key)] for _ in range(rows)]
+    # Create matrix and fill row-wise
+    matrix = [['' for _ in range(num_cols)] for _ in range(num_rows)]
+    for i, char in enumerate(text):
+        row = i // num_cols
+        col = i % num_cols
+        matrix[row][col] = char
 
-        # Fill the matrix row-wise
-        for i, char in enumerate(text):
-            row = i // key
-            col = i % key
-            matrix[row][col] = char
+    # Shuffle columns
+    col_order = list(range(num_cols))
+    random.shuffle(col_order)
 
-        # Read the matrix column-wise to get the ciphertext
-        ciphertext = ''
-        for col in range(key):
-            for row in range(rows):
-                if matrix[row][col] != '':
-                    ciphertext += matrix[row][col]
+    # Encryption: Read in shuffled column order
+    if encrypt:
+        result = ''
+        for col in col_order:
+            for row in range(num_rows):
+                result += matrix[row][col]
 
-        return ciphertext
+    # Decryption: Reverse the shuffle to read columns in original order
+    else:
+        # Reverse shuffle to find original columns
+        original_order = [0] * num_cols
+        for i, col in enumerate(col_order):
+            original_order[col] = i
 
-    else:  # Decrypt
-        # Calculate the number of rows needed
-        rows = (len(text) + key - 1) // key
-
-        # Create a list of lists (matrixx) with the calculated number of rows
-        matrix = [['' for _ in range(key)] for _ in range(rows)]
-
-        # Fill the matrix column-wise
+        # Fill columns in reverse order
         idx = 0
-        for col in range(key):
-            for row in range(rows):
+        for col in original_order:
+            for row in range(num_rows):
                 if idx < len(text):
                     matrix[row][col] = text[idx]
                     idx += 1
 
-        # Read the matrix row-wise to get the plaintext
-        plaintext = ''
-        for row in range(rows):
-            for col in range(key):
-                plaintext += matrix[row][col]
+        # Read row-wise
+        plaintext = ''.join([''.join(row) for row in matrix])
 
-        return plaintext
+    return plaintext
 
 
 def process_file(input_file, output_file, method, key, encrypt):

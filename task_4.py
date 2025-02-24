@@ -20,15 +20,15 @@ def retrieve_file_message(input_file, output_file, method, key, encrypt):
         return
 
     # Process the content
-    header = lines[:7]
-    content = lines[7:-1]
+    header = ''.join(lines[:7])
+    content = ''.join(lines[7:-1])
     footer = lines[-1]
 
     content = process_text(content, method, key, encrypt)
 
     # Write to output file
     with open(output_file, 'w', encoding="UTF-8") as file:
-        file.writelines(header)
+        file.write(header)
         file.write(content)
         file.write(footer)
 

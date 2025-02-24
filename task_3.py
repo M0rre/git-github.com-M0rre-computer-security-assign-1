@@ -27,6 +27,11 @@ def transposition_cipher(text, key, encrypt):
     num_cols = key
     num_rows = (len(text) + num_cols - 1) // num_cols
 
+    # Pad text if necessary
+    padding_length = num_rows * num_cols - len(text)
+    if encrypt:
+        text += ' ' * padding_length  # Pad with spaces
+
     # Create matrix and fill row-wise
     matrix = [['' for _ in range(num_cols)] for _ in range(num_rows)]
     for i, char in enumerate(text):
@@ -40,10 +45,11 @@ def transposition_cipher(text, key, encrypt):
 
     # Encryption: Read in shuffled column order
     if encrypt:
-        plaintext = ''
+        ciphertext = ''
         for col in col_order:
             for row in range(num_rows):
-                plaintext += matrix[row][col]
+                ciphertext += matrix[row][col]
+        return ciphertext
 
     # Decryption: Reverse the shuffle to read columns in original order
     else:
@@ -62,8 +68,7 @@ def transposition_cipher(text, key, encrypt):
 
         # Convert rows to one string
         plaintext = ''.join([''.join(row) for row in matrix])
-
-    return plaintext
+        return plaintext
 
 
 def process_file(input_file, output_file, method, key, encrypt):

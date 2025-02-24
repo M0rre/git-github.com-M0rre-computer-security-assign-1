@@ -20,10 +20,14 @@ def retrieve_file_message(input_file, output_file, method, key, encrypt):
         return
 
     # Process the content
-    header = ''.join(lines[:7])
-    content = ''.join(lines[7:-1])
-    footer = lines[-1]
-
+    if len(lines) > 8:
+        header = ''.join(lines[:7])
+        content = ''.join(lines[7:-1])
+        footer = lines[-1]
+    else:
+        header = ''
+        content = ''.join(lines[:])
+        footer = ''
     content = process_text(content, method, key, encrypt)
 
     # Write to output file

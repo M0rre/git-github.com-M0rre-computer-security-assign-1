@@ -3,7 +3,7 @@ import random
 
 def substitution_cipher(text, key,  encrypt):
     result = ""
-    key = key % 256  # Keeps key withing bounds
+    key = key % 128  # Printable ASCII chars
     for char in text:
         if encrypt:
             # ord() to get unicode value then shift character up by key and go back to char
@@ -11,13 +11,13 @@ def substitution_cipher(text, key,  encrypt):
                 result += char
                 continue
             else:
-                result += chr((ord(char) + key) % 256)
+                result += chr((ord(char) + key) % 128)
         else:
             # Shift down -||-
             if char == '\n':
                 result += char
                 continue
-            result += chr((ord(char) - key) % 256)
+            result += chr((ord(char) - key) % 128)
     return result
 
 
@@ -40,10 +40,10 @@ def transposition_cipher(text, key, encrypt):
 
     # Encryption: Read in shuffled column order
     if encrypt:
-        result = ''
+        plaintext = ''
         for col in col_order:
             for row in range(num_rows):
-                result += matrix[row][col]
+                plaintext += matrix[row][col]
 
     # Decryption: Reverse the shuffle to read columns in original order
     else:
@@ -60,7 +60,7 @@ def transposition_cipher(text, key, encrypt):
                     matrix[row][col] = text[idx]
                     idx += 1
 
-        # Read row-wise
+        # Convert rows to one string
         plaintext = ''.join([''.join(row) for row in matrix])
 
     return plaintext

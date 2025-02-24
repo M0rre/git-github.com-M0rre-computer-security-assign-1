@@ -30,6 +30,7 @@ def retrieve_file_message(input_file, output_file, method, key, encrypt):
     with open(output_file, 'w', encoding="UTF-8") as file:
         file.write(header)
         file.write(content)
+        file.write("\n")
         file.write(footer)
 
 

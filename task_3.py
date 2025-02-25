@@ -3,7 +3,7 @@ import random
 
 def substitution_cipher(text, key,  encrypt):
     result = ""
-    key = key % 128  # Printable ASCII chars
+    key = key % 256  # Keep key within range
     for char in text:
         if encrypt:
             # ord() to get unicode value then shift character up by key and go back to char
@@ -11,13 +11,13 @@ def substitution_cipher(text, key,  encrypt):
                 result += char
                 continue
             else:
-                result += chr((ord(char) + key) % 128)
+                result += chr((ord(char) + key) % 256)
         else:
             # Shift down -||-
             if char == '\n':
                 result += char
                 continue
-            result += chr((ord(char) - key) % 128)
+            result += chr((ord(char) - key) % 256)
     return result
 
 
@@ -82,14 +82,14 @@ def process_file(input_file, output_file, method, key, encrypt):
 
     # Select enc method
     if method == 's':
-        encrypted_text = substitution_cipher(text, key, encrypt)
+        processed_text = substitution_cipher(text, key, encrypt)
     elif method == 't':
-        encrypted_text = transposition_cipher(text, key, encrypt)
+        processed_text = transposition_cipher(text, key, encrypt)
     else:
         raise ValueError("Invalid encryption method.")
 
     with open(output_file, 'w', encoding="UTF-8") as file:
-        file.write(encrypted_text)
+        file.write(processed_text)
 
 
 def main():

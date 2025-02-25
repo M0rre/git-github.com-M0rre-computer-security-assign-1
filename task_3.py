@@ -1,6 +1,3 @@
-import random
-
-
 def substitution_cipher(text, key,  encrypt):
     result = ""
     key = key % 256  # Keep key within range
@@ -22,53 +19,54 @@ def substitution_cipher(text, key,  encrypt):
 
 
 def transposition_cipher(text, key, encrypt):
-    # Set seed for reproducible shuffle
-    random.seed(key) 
-    num_cols = key
-    num_rows = (len(text) + num_cols - 1) // num_cols
+    col = len(key)
+    row = (len(text) + col - 1) // col
+    k_indx = 0
 
-    # Pad text if necessary
-    padding_length = num_rows * num_cols - len(text)
+
     if encrypt:
-        text += ' ' * padding_length  # Pad with spaces
+        cipher = ""
 
-    # Create matrix and fill row-wise
-    matrix = [['' for _ in range(num_cols)] for _ in range(num_rows)]
-    for i, char in enumerate(text):
-        row = i // num_cols
-        col = i % num_cols
-        matrix[row][col] = char
+        text_lst = list(text)
+        key_lst = sorted([(char, index) for index, char in enumerate(key)])
 
-    # Shuffle columns
-    col_order = list(range(num_cols))
-    random.shuffle(col_order)
+        # Pad the text with '_'
+        fill_null = (row * col) - len(text)
+        text_lst.extend('_' * fill_null)
 
-    # Encryption: Read in shuffled column order
-    if encrypt:
-        ciphertext = ''
-        for col in col_order:
-            for row in range(num_rows):
-                ciphertext += matrix[row][col]
-        return ciphertext
+        # Create matrix row-wise
+        matrix = [text_lst[i: i + col] for i in range(0, len(text_lst), col)]
 
-    # Decryption: Reverse the shuffle to read columns in original order
+        # Read matrix column-wise using the sorted key
+        for _, curr_idx in key_lst:
+            cipher += ''.join([row[curr_idx] for row in matrix])
+
+        return cipher
+
     else:
-        # Reverse shuffle to find original columns
-        original_order = [0] * num_cols
-        for i, col in enumerate(col_order):
-            original_order[col] = i
+        plaintext = ""
+        text_indx = 0
 
-        # Fill columns in reverse order
-        idx = 0
-        for col in original_order:
-            for row in range(num_rows):
-                if idx < len(text):
-                    matrix[row][col] = text[idx]
-                    idx += 1
+        key_lst = sorted([(char, index) for index, char in enumerate(key)])
 
-        # Convert rows to one string
-        plaintext = ''.join([''.join(row) for row in matrix])
-        return plaintext
+        # Create an empty matrix for decrypted message
+        dec_cipher = []
+        for _ in range(row):
+            dec_cipher += [[None] * col]
+
+        # Fill the matrix column by column according to the key
+        for _, curr_idx in key_lst:
+            for j in range(row):
+                if text_indx < len(text):
+                    dec_cipher[j][curr_idx] = text[text_indx]
+                    text_indx += 1
+
+        # Flatten the matrix and convert it to a string
+        plaintext = ''.join([char if char is not None else '' for row in dec_cipher for char in row])
+
+
+        # Remove padding
+        return plaintext.rstrip('_')
 
 
 def process_file(input_file, output_file, method, key, encrypt):

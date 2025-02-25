@@ -3,7 +3,7 @@ from task_3 import substitution_cipher, transposition_cipher
 
 def process_text(text, method, key, encrypt):
     if method == 's':
-        return substitution_cipher(text, key, encrypt)
+        return substitution_cipher(text, int(key), encrypt)
     elif method == 't':
         return transposition_cipher(text, key, encrypt)
     else:
@@ -41,7 +41,7 @@ def retrieve_file_message(input_file, output_file, method, key, encrypt):
 def main():
     operation = input("Choose operation (encrypt(E)/decrypt(D)): ").lower()
     method = input("Choose encryption method (substitution(S)/transposition(T)): ").lower()
-    key = int(input("Enter the secret key: "))
+    key = input("Enter the secret key: ")
     input_file = input("Input the name of the file you want to process: ")
     file_name, _ = input_file.split(".")  # Don't you dare have more than one dot in the file name
     output_file = file_name + "_enc.txt" if operation == 'e' else file_name + "_dec.txt"

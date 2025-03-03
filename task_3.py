@@ -19,54 +19,111 @@ def substitution_cipher(text, key,  encrypt):
 
 
 def transposition_cipher(text, key, encrypt):
-    col = len(key)
-    row = (len(text) + col - 1) // col
-    k_indx = 0
-
-
+    """
+    Implement a transposition cipher.
+    
+    Args:
+        text (str): The text to encrypt/decrypt
+        key (str): The key used for encryption/decryption
+        encrypt (bool): True for encryption, False for decryption
+        
+    Returns:
+        str: The encrypted/decrypted text
+    """
+    # Input validation
+    if not text:
+        return ""
+    
+    if not key:
+        return "Error: Key cannot be empty"
+    
+    # Remove duplicates from the key while preserving order
+    unique_key = ""
+    for char in key:
+        if char not in unique_key:
+            unique_key += char
+    
+    key_length = len(unique_key)
+    
+    # Create key order based on alphabetical sorting
+    # First create a list of (character, position) tuples
+    indexed_key = [(char, i) for i, char in enumerate(unique_key)]
+    # Sort by character
+    sorted_indexed_key = sorted(indexed_key, key=lambda x: x[0])
+    # Create a mapping from sorted position to original position
+    key_order = [item[1] for item in sorted_indexed_key]
+    
     if encrypt:
-        cipher = ""
-
-        text_lst = list(text)
-        key_lst = sorted([(char, index) for index, char in enumerate(key)])
-
-        # Pad the text with '_'
-        fill_null = (row * col) - len(text)
-        text_lst.extend('_' * fill_null)
-
-        # Create matrix row-wise
-        matrix = [text_lst[i: i + col] for i in range(0, len(text_lst), col)]
-
-        # Read matrix column-wise using the sorted key
-        for _, curr_idx in key_lst:
-            cipher += ''.join([row[curr_idx] for row in matrix])
-
-        return cipher
-
+        # Encryption
+        # Add padding if necessary
+        padded_length = ((len(text) + key_length - 1) // key_length) * key_length
+        padded_text = text.ljust(padded_length)
+        
+        # Arrange text in a matrix with width equal to key length
+        matrix = []
+        for i in range(0, padded_length, key_length):
+            row = padded_text[i:i+key_length]
+            matrix.append(row)
+        
+        # Read out by columns according to key order
+        result = ""
+        for col_index in range(key_length):
+            # Find the original column index this corresponds to
+            orig_col = key_order.index(col_index)
+            for row in matrix:
+                if orig_col < len(row):
+                    result += row[orig_col]
+        
+        return result
+    
     else:
-        plaintext = ""
-        text_indx = 0
+        # Decryption
+        # Calculate the dimensions of the original matrix
+        rows = (len(text) + key_length - 1) // key_length
+        cols = key_length
+        
+        # Special case: the last row might not be complete
+        last_row_size = len(text) % key_length
+        if last_row_size == 0 and len(text) > 0:
+            last_row_size = key_length
+        
+        # Create an empty matrix
+        matrix = [[''] * cols for _ in range(rows)]
+        
+        # Calculate the number of characters in each column
+        col_sizes = [rows for _ in range(cols)]
+        if last_row_size > 0 and last_row_size < cols:
+            # Adjust the size of columns that don't have a character in the last row
+            for i in range(last_row_size, cols):
+                col_sizes[key_order[i]] -= 1
+        
+        # Fill the matrix with the ciphertext
+        index = 0
+        for col_index in range(cols):
+            # Find the original column this corresponds to
+            orig_col = key_order.index(col_index)
+            for row in range(col_sizes[orig_col]):
+                matrix[row][orig_col] = text[index]
+                index += 1
+        
+        # Read out the plaintext row by row
+        result = ""
+        for row in matrix:
+            result += ''.join(row)
+        
+        # Remove any padding spaces at the end
+        return result.rstrip()
 
-        key_lst = sorted([(char, index) for index, char in enumerate(key)])
-
-        # Create an empty matrix for decrypted message
-        dec_cipher = []
-        for _ in range(row):
-            dec_cipher += [[None] * col]
-
-        # Fill the matrix column by column according to the key
-        for _, curr_idx in key_lst:
-            for j in range(row):
-                if text_indx < len(text):
-                    dec_cipher[j][curr_idx] = text[text_indx]
-                    text_indx += 1
-
-        # Flatten the matrix and convert it to a string
-        plaintext = ''.join([char if char is not None else '' for row in dec_cipher for char in row])
+# Example usage:
+# test = "omg it's corn"
+# key = "CIPHER"
+# encrypted = transposition_cipher(test, key, True)
+# decrypted = transposition_cipher(encrypted, key, False)
+# print(f"Original: '{test}'")
+# print(f"Encrypted: '{encrypted}'")
+# print(f"Decrypted: '{decrypted}'")
 
 
-        # Remove padding
-        return plaintext.rstrip('_')
 
 
 def process_file(input_file, output_file, method, key, encrypt):

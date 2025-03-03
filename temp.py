@@ -1,58 +1,51 @@
-import random
+def transposition_cipher(text, key, encrypt):
+    col = len(key)
+    row = (len(text) + col - 1) // col
 
-def transposition_cipher(text, key, encrypt=True):
-    # Set seed for reproducible shuffle
-    random.seed(key)
-    num_cols = key
-    num_rows = (len(text) + num_cols - 1) // num_cols
-
-    # Create matrix and fill row-wise
-    matrix = [['' for _ in range(num_cols)] for _ in range(num_rows)]
-    for i, char in enumerate(text):
-        row = i // num_cols
-        col = i % num_cols
-        matrix[row][col] = char
-
-    # Shuffle columns
-    col_order = list(range(num_cols))
-    random.shuffle(col_order)
-
-    # Encryption: Read in shuffled column order
     if encrypt:
-        ciphertext = ''
-        for col in col_order:
-            for row in range(num_rows):
-                ciphertext += matrix[row][col]
-        return ciphertext
+        cipher = ""
 
-    # Decryption: Reverse the shuffle to read columns in original order
+        # Create key mapping - sort key characters and keep track of original positions
+        key_mapping = sorted([(char, index) for index, char in enumerate(key)])
+
+        # Pad the text with '_'
+        text_padded = text + '_' * ((row * col) - len(text))
+
+        # Create matrix row-wise
+        matrix = [list(text_padded[i: i + col]) for i in range(0, len(text_padded), col)]
+
+        # Read matrix column-wise using the sorted key
+        for _, original_idx in key_mapping:
+            for i in range(row):
+                cipher += matrix[i][original_idx]
+
+        return cipher
+
     else:
-        # Reverse shuffle to find original columns
-        original_order = [0] * num_cols
-        for i, col in enumerate(col_order):
-            original_order[col] = i
-
-        # Fill columns in reverse order
-        idx = 0
-        for col in original_order:
-            for row in range(num_rows):
-                if idx < len(text):
-                    matrix[row][col] = text[idx]
-                    idx += 1
-
-        # Convert rows to one string
-        plaintext = ''.join([''.join(row) for row in matrix])
-        return plaintext
-
-# Example usage:
-key = 5
-text = """HELLOWORLD
-test with newlines"""
-
-# Encrypt
-encrypted_text = transposition_cipher(text, key, encrypt=True)
-print("Encrypted:", encrypted_text)
-
-# Decrypt
-decrypted_text = transposition_cipher(encrypted_text, key, encrypt=False)
-print("Decrypted:", decrypted_text)
+        # Create empty result matrix
+        matrix = [[None for _ in range(col)] for _ in range(row)]
+        
+        # Create key mapping
+        original_order = [(char, idx) for idx, char in enumerate(key)]
+        key_mapping = sorted(original_order, key=lambda x: x[0])  # Sort by character
+        
+        # Calculate characters per column
+        chars_per_col = row
+        
+        # Fill the matrix column by column according to the sorted key
+        current_idx = 0
+        for _, original_idx in key_mapping:
+            for i in range(row):
+                if current_idx < len(text):
+                    matrix[i][original_idx] = text[current_idx]
+                    current_idx += 1
+        
+        # Read the matrix row by row to get the original text
+        plaintext = ""
+        for i in range(row):
+            for j in range(col):
+                if matrix[i][j] is not None:
+                    plaintext += matrix[i][j]
+        
+        # Remove padding
+        return plaintext.rstrip('_')

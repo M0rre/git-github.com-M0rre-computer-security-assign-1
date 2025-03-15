@@ -1,4 +1,5 @@
 from task_3 import substitution_cipher, transposition_cipher
+# keys: 94, b3 movie
 
 
 def process_text(text, method, key, encrypt):
@@ -14,28 +15,28 @@ def retrieve_file_message(input_file, output_file, method, key, encrypt):
     # Read input file
     try:
         with open(input_file, 'r', encoding="UTF-8") as file:
-            lines = file.readlines()
+            content = file.read()  # Get all the text
+            #lines = text.splitlines()  # To retrieve specific parts
     except FileNotFoundError:
         print(f"Error: The file {input_file} was not found.")
         return
 
     # Process the content
-    if len(lines) > 8:
-        header = ''.join(lines[:7])
-        content = ''.join(lines[7:-1])
-        footer = lines[-1]
+    """  if len(lines) > 8:
+        header = '\n'.join(lines[:7]) + '\n'
+        content = '\n'.join(lines[7:-1])
+        footer = lines[-1] + '\n'
     else:
         header = ''
         content = ''.join(lines[:])
-        footer = ''
+        footer = ''"""
     content = process_text(content, method, key, encrypt)
 
     # Write to output file
     with open(output_file, 'w', encoding="UTF-8") as file:
-        file.write(header)
-        file.write(content)
-        file.write("\n")
-        file.write(footer)
+        #file.write(header)
+        file.write(content)        #file.write("\n")
+        #file.write(footer)
 
 
 def main():

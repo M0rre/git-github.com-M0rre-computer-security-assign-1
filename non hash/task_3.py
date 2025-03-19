@@ -38,7 +38,7 @@ def transposition_cipher(text, key, encrypt):
 
         # Pad columns that aren't completely filled
         fill_null = (row * col) - len(text)
-        text_lst.extend('_' * fill_null)
+        text_lst.extend('_' * fill_null)  # Change depending on if inc. in text
 
         # Sort the key to determine column order
         key_lst = sorted([(char, index) for index, char in enumerate(key)])
@@ -49,34 +49,26 @@ def transposition_cipher(text, key, encrypt):
         # Encrypt by reading matrix column-wise using sorted key
         cipher = ""
         for _, curr_idx in key_lst:
-            cipher += ''.join([row[curr_idx] if curr_idx < len(row) else '_' for row in matrix])
+            cipher += ''.join([row[curr_idx] for row in matrix])
 
         return cipher
 
     else:
-        # Create sorted key list
         sorted_key = sorted([(char, index) for index, char in enumerate(key)])
 
-        # Divide the cipher into equal-length segments
-        # Handle case where text length might not be perfectly divisible
-        segments = [
-            text[i * row : min((i + 1) * row, len(text))] 
-            for i in range(col)
-        ]
+        # Divide the cipher into chunks
+        # Min to handle cases where text length not be perfectly divisible
+        segments = [text[i * row: min((i + 1) * row, len(text))] for i in range(col)]
 
-        # Initialize matrix
         matrix = [[''] * col for _ in range(row)]
 
-        # Restore original column order
-        for seg_index, (_, orig_col_index) in enumerate(sorted_key):
-            segment = segments[seg_index]
+        # Return to plaintext order
+        for idx, (_, orig_col_index) in enumerate(sorted_key):
+            segment = segments[idx]
             for r in range(min(row, len(segment))):
                 matrix[r][orig_col_index] = segment[r]
 
-        # Read matrix row-wise
         plaintext = ''.join(''.join(row) for row in matrix)
-
-        # Remove padding
         return plaintext.rstrip('_')
 
 
